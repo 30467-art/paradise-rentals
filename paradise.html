@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Paradise Rentals</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins",sans-serif; }
+
+/* Colors */
+:root {
+  --primary: #eda811;   
+  --secondary: #2c3e50; 
+  --background: #f8f9fa; 
+  --accent: #2fea67;    
+}
+
+body { background: var(--background); color: var(--secondary); min-height:100vh; scroll-behavior:smooth; }
+.home { display:none; padding:30px; color: var(--secondary); background: var(--background); }
+
+/* MODAL LOGIN */
+.overlay { position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10; }
+.modal { background: var(--background); border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); width:400px; max-width:90%; padding:30px; text-align:center; animation:fadeIn 0.4s ease; }
+@keyframes fadeIn { from { transform:scale(0.9); opacity:0; } to { transform:scale(1); opacity:1; } }
+h1 { color: var(--primary); margin-bottom:10px; font-weight:bold; }
+input { width:100%; padding:12px; margin:10px 0; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+button { width:100%; padding:12px; background: var(--primary); color: var(--background); border:none; border-radius:8px; font-size:16px; cursor:pointer; transition:0.3s; }
+button:hover { background: var(--accent); color: var(--background); }
+a { color: var(--accent); cursor:pointer; text-decoration:none; transition:0.3s; }
+a:hover { text-decoration:underline; }
+
+/* HOME PAGE */
+header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:30px; }
+/* Enlarged nav links */
+nav a { margin:0 15px; font-weight:600; font-size:26px; transition:0.3s; color: var(--secondary); }
+nav a:hover { color: var(--accent); }
+.logout-btn { background:none; border:none; color: var(--secondary); font-weight:bold; cursor:pointer; font-size:18px; transition:0.3s; }
+.logout-btn:hover { color: var(--accent); }
+
+.site-title { text-align:center; font-size:60px; color: var(--primary); margin-bottom:20px; font-weight:bold; text-shadow: 1px 2px 6px rgba(0,0,0,0.15); }
+.welcome { text-align:center; margin-bottom:25px; font-size:18px; color: var(--secondary); }
+
+.search-section { text-align:center; margin-bottom:20px; }
+.search-section input { width:60%; max-width:500px; padding:12px 25px; border-radius:25px; border:1px solid #ccc; outline:none; font-size:16px; box-shadow:0 5px 15px rgba(0,0,0,0.1); transition:0.3s; }
+.search-section input:focus { box-shadow:0 8px 20px rgba(0,0,0,0.2); }
+
+/* Rentals Cards */
+.rentals { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:25px; }
+.card { background: var(--background); color: var(--secondary); border-radius:15px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor:pointer; }
+.card:hover { transform:translateY(-10px) scale(1.03); box-shadow:0 10px 25px rgba(0,0,0,0.2); }
+.card img { width:100%; height:180px; object-fit:cover; transition:0.3s; }
+.card img:hover { transform:scale(1.05); }
+.card-content { padding:15px; }
+.card-content h3 { color: var(--primary); margin-bottom:8px; font-size:20px; }
+
+/* Sections */
+.section { display:none; background: var(--background); padding:30px; border-radius:20px; margin:30px auto; max-width:900px; color: var(--secondary); opacity:0; transform:translateY(20px); transition:all 0.6s ease; }
+/* FIXED: show section properly */
+.section.show { display:block; opacity:1; transform:translateY(0); }
+
+/* ROOM DETAILS POPUP */
+.details-popup { position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center; z-index:20; }
+.details-box { background: var(--background); border-radius:20px; padding:30px; width:450px; max-width:90%; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation:fadeIn 0.4s ease; text-align:center; }
+.details-box img { width:100%; height:220px; object-fit:cover; border-radius:12px; margin-bottom:15px; }
+.details-box h3 { color: var(--primary); margin-bottom:10px; font-size:22px; }
+
+/* Booking Section */
+.bookings { margin-top:50px; background: var(--background); border-radius:15px; padding:25px; position:relative; }
+.booking-item { background: var(--background); color: var(--secondary); padding:12px; border-radius:12px; margin:12px 0; box-shadow:0 2px 8px rgba(0,0,0,0.1); transition:0.3s; display:flex; justify-content:space-between; align-items:center; }
+.booking-item:hover { transform:scale(1.02); box-shadow:0 5px 15px rgba(0,0,0,0.15); }
+.booking-item small { opacity:0.7; }
+.remove-btn { background: var(--primary); color: var(--background); border:none; padding:4px 8px; border-radius:5px; font-size:12px; cursor:pointer; margin-left:10px; transition:0.3s; }
+.remove-btn:hover { background: var(--accent); }
+
+#bookingSummaryPopup { position:absolute; top:-10px; right:10px; background: var(--secondary); color: var(--background); padding:10px 15px; border-radius:10px; display:none; font-weight:bold; z-index:5; }
+#confirmBookingBtn { background: var(--primary); color: var(--background); padding:10px 20px; border:none; border-radius:10px; font-size:15px; cursor:pointer; margin-top:15px; }
+#confirmBookingBtn:hover { background: var(--accent); }
+
+@media (max-width:768px) { .search-section input { width:90%; } .site-title { font-size:48px; } .card img { height:160px; } nav a { font-size:22px; margin:0 8px; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div class="overlay" id="authOverlay">
+  <div class="modal" id="authModal">
+    <h1>Paradise</h1>
+    <h3 id="formTitle">Login to Your Account</h3>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="home" id="homePage">
+  <header>
+    <nav>
+      <a onclick="showHome()">Home</a>
+      <a onclick="showSection('aboutSection')">About</a>
+      <a onclick="showSection('contactSection')">Contact</a>
+      <a onclick="showSection('helpSection')">Help</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </nav>
+  </header>
+
+  <div class="site-title">Paradise Rentals</div>
+  <div class="welcome"><p>Rent • Enjoy • Return</p></div>
+
+  <div class="search-section">
+    <input type="text" id="searchBar" placeholder="Search homes..." onkeyup="filterHomes()">
+  </div>
+
+  <h2 style="text-align:center; margin-bottom:20px;">Available Rentals</h2>
+  <div class="rentals" id="rentalList">
+    <div class="card" data-name="Luxury Suite" data-price="$80/night" data-desc="Private garden, Wi-Fi, city view." data-img="index2.html">
+      <img src="index2.html" alt="Luxury Suite">
+      <div class="card-content">
+        <h3>Luxury Suite</h3>
+        <p>$80/night - Includes breakfast</p>
+      </div>
+    </div>
+    <div class="card" data-name="Modern Apartment" data-price="$65/night" data-desc="Hot shower, internet, pool." data-img="index3.html">
+      <img src="index3.html" alt="Modern Apartment">
+      <div class="card-content">
+        <h3>Modern Apartment</h3>
+        <p>$65/night - Swimming pool access</p>
+      </div>
+    </div>
+    <div class="card" data-name="Cozy Villa" data-price="$120/night" data-desc="Private garden, Wi-Fi." data-img="index5.html">
+      <img src="index5.html" alt="Cozy Villa">
+      <div class="card-content">
+        <h3>Cozy Villa</h3>
+        <p>$120/night - Private garden</p>
+      </div>
+    </div>
+    <div class="card" data-name="Hotel Room" data-price="$50/night" data-desc="Comfortable room with outside view." data-img="index4.html">
+      <img src="index4.html" alt="Hotel Room">
+      <div class="card-content">
+        <h3>Hotel Room</h3>
+        <p>$50/night - Breakfast & gym</p>
+      </div>
+    </div>
+  </div>
+
+<!-- Sections -->
+<div id="aboutSection" class="section">
+  <h2>About Paradise Rentals</h2>
+  <p>Luxurious and affordable rooms with modern amenities including breakfast, Wi-Fi, and a swimming pool. Enjoy comfort and style!</p>
+</div>
+
+<div id="contactSection" class="section">
+  <h2>Contact Us</h2>
+  <p>Phone: 0759351621</p>
+  <p>Email: <a href="mailto:30667@embuni.ac.ke">30467@student.embuni.ac.ke</a></p>
+</div>
+
+<div id="helpSection" class="section">
+  <h2>Help</h2>
+  <p>Use the search bar to find rooms, click on a card for details, and click 'Book Now' to reserve your room.</p>
+</div>
+
+  <!-- BOOKINGS LIST -->
+  <div class="bookings" id="bookingsSection" onmouseenter="showBookingPopup()" onmouseleave="hideBookingPopup()">
+    <h2>My Bookings</h2>
+    <div id="bookingsList"><p style="opacity:0.8;">No bookings yet. Click “Book Now” on a room to add it here.</p></div>
+    <div id="bookingSummaryPopup">Total: $<span id="totalCost">0</span></div>
+    <button id="confirmBookingBtn" onclick="confirmBooking()">Confirm Booking</button>
+  </div>
+</div>
+
+<!-- ROOM DETAILS POPUP -->
+<div class="details-popup" id="detailsPopup">
+  <div class="details-box">
+    <img id="popupImg" src="" alt="Room Image">
+    <h3 id="popupTitle"></h3>
+    <p id="popupPrice"></p>
+    <p id="popupDesc"></p>
+    <button onclick="bookRoom()">Book Now</button>
+    <button style="margin-top:10px; background:var(--primary);" onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<script>
+let users={"joshuamwendwamuteti@gmail.com":"123456"};
+let currentUser="";
+let selectedRoom={};
+let totalCost=0;
+
+function login(){
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value.trim();
+  if(users[email] && users[email]===password){
+    currentUser=email;
+    document.getElementById("authOverlay").style.display="none";
+    document.getElementById("homePage").style.display="block";
+    showHome();
+  }else{ alert("❌ Invalid email or password."); }
+}
+
+function logout(){ currentUser=""; document.getElementById("homePage").style.display="none"; document.getElementById("authOverlay").style.display="flex"; }
+
+function filterHomes(){
+  const input=document.getElementById("searchBar").value.toLowerCase();
+  document.querySelectorAll(".card").forEach(card=>{
+    const name=card.getAttribute("data-name").toLowerCase();
+    card.style.display=name.includes(input)?"block":"none";
+  });
+}
+
+const popup=document.getElementById("detailsPopup");
+document.querySelectorAll(".card").forEach(card=>{
+  card.addEventListener("click",()=>{
+    selectedRoom={
+      name: card.getAttribute("data-name"),
+      price: card.getAttribute("data-price"),
+      desc: card.getAttribute("data-desc"),
+      img: card.getAttribute("data-img")
+    };
+    document.getElementById("popupTitle").innerText = selectedRoom.name;
+    document.getElementById("popupPrice").innerText = selectedRoom.price;
+    document.getElementById("popupDesc").innerText = selectedRoom.desc;
+    document.getElementById("popupImg").src = selectedRoom.img;
+    popup.style.display = "flex";
+  });
+});
+
+function closePopup(){ popup.style.display="none"; }
+
+function bookRoom(){
+  const bookingsList=document.getElementById("bookingsList");
+  const noBookingText=bookingsList.querySelector('p'); if(noBookingText) noBookingText.remove();
+  const bookingItem=document.createElement("div"); bookingItem.classList.add("booking-item");
+  bookingItem.innerHTML=`<strong>${selectedRoom.name}</strong> - ${selectedRoom.price}<small>${selectedRoom.desc}</small>`;
+  const priceNum=parseFloat(selectedRoom.price.replace(/[^0-9.]/g,'')); totalCost+=priceNum;
+  document.getElementById("totalCost").innerText=totalCost.toFixed(2); 
+  document.getElementById("bookingSummaryPopup").style.display="block";
+
+  const removeBtn=document.createElement("button"); removeBtn.textContent="x";
+  removeBtn.classList.add("remove-btn");
+  removeBtn.onclick=()=>{ 
+    bookingsList.removeChild(bookingItem); 
+    totalCost-=priceNum; 
+    document.getElementById("totalCost").innerText=totalCost.toFixed(2); 
+    if(totalCost===0) document.getElementById("bookingSummaryPopup").style.display="none"; 
+  };
+  bookingItem.appendChild(removeBtn);
+  bookingsList.appendChild(bookingItem); 
+  popup.style.display="none";
+}
+
+function showSection(sectionId){ 
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('show')); 
+  const sec=document.getElementById(sectionId); 
+  sec.classList.add('show'); 
+  sec.scrollIntoView({behavior:'smooth'});
+}
+
+function showHome(){ document.querySelectorAll('.section').forEach(s=>s.classList.remove('show')); window.scrollTo({ top:0, behavior:'smooth' }); }
+function showBookingPopup(){ if(totalCost>0) document.getElementById("bookingSummaryPopup").style.display="block"; }
+function hideBookingPopup(){ document.getElementById("bookingSummaryPopup").style.display="none"; }
+
+function confirmBooking(){
+  if(totalCost===0){ alert("No rooms booked yet."); return; }
+  alert(`Booking Confirmed!\nTotal Cost: $${totalCost.toFixed(2)}\nThank you for choosing Paradise Rentals!`);
+  document.getElementById("bookingsList").innerHTML='<p style="opacity:0.8;">No bookings yet. Click “Book Now” on a room to add it here.</p>';
+  totalCost=0;
+  document.getElementById("totalCost").innerText='0';
+  document.getElementById("bookingSummaryPopup").style.display="none";
+}
+</script>
+</body>
+</html>
+
+
+
